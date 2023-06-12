@@ -19,6 +19,7 @@ Usage
 from typing import Callable
 from typing import Optional
 from typing import Type
+from typing import Any
 
 from fastapi import Depends
 from fastapi import HTTPException
@@ -41,6 +42,7 @@ def get_auth(
     issuer: str,
     signature_cache_ttl: int,
     token_type: Type[IDToken] = IDToken,
+    jwt_decode_options: Optional[dict[str, Any]] = None,
 ) -> Callable[[str], IDToken]:
     """Take configurations and return the authenticate_user function.
 
@@ -108,7 +110,7 @@ def get_auth(
                 audience=audience if audience else client_id,
                 issuer=issuer,
                 # Disabled at_hash check since we aren't using the access token
-                options={"verify_at_hash": False},
+                options={"verify_at_hash": False, **(jwt_decode_options or {})},
             )
             return token_type.parse_obj(token)
 
